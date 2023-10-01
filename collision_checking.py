@@ -79,7 +79,22 @@ if __name__ == '__main__':
             add_polygon_to_scene(polygon, ax, 'red')
         else:
             add_polygon_to_scene(polygon, ax, 'blue')
-    show_scene(ax)
+    show_scene(ax, 800, 800)
+    
+    
+def check_two_collision(polygon1, polygon2):
+    box_collisions.clear()
+    polygon_collisions.clear()
+    polygons = []
+    polygons.append(polygon1)
+    polygons.append(polygon2)
+    check_all_boxes(polygons)
+    for pair in box_collisions:
+        p1, p2 = pair #unpack polygons
+        if SAT_Collides(p1, p2): return False
+    return True
+    
+    
 
 
 
