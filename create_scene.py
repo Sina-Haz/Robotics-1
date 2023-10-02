@@ -5,7 +5,7 @@ from scipy.spatial import ConvexHull
 
 # Returns an np array of convex polygons (2D-np array)
 #p is # of polygons, n_min/n_max are bounds on # of vertices, r_min/r_max are bounds on size, x/y-dim is size of grid
-def make_polygons(p, n_min, n_max, r_min, r_max, xdim ,ydim):
+def make_polygons(p, n_min, n_max, r_min, r_max, xdim=2 ,ydim=2):
     # define center of all the polygons
     center_pol = []
     
@@ -30,26 +30,33 @@ def make_polygons(p, n_min, n_max, r_min, r_max, xdim ,ydim):
         
     return np.array(polygons, dtype = object)
 
-def add_polygon_to_scene(polygon, ax, color):
-    pol = plt.Polygon(polygon, closed = True, color = color)
+def add_polygon_to_scene(polygon, ax, fill):
+    pol = plt.Polygon(polygon, closed = True, fill=fill,color = 'black',alpha = 0.4)
     ax.add_patch(pol)
 
 def create_plot():
-    fig, ax = plt.subplots(figsize = (8,8))
+    fig, ax = plt.subplots(dpi=100)
     return ax
 
 # Takes in our generated polygons and generates scene that's 800 x 800 px
 def show_scene(ax):
-    ax.set_xlim(0, 800)
-    ax.set_ylim(0, 800)
+    ax.set_xlim(0,2)
+    ax.set_ylim(0,2)
+    ax.set_aspect('equal')
     plt.gca().set_aspect('equal', adjustable='box')  # Make sure the aspect ratio is equal
     plt.grid(True)
     plt.show()
 
+def save_polygons(polygons, filename):
+    np.save(filename,arr=polygons,allow_pickle=True)
+
+def load_polygons(filename):
+    return np.load(filename,allow_pickle=True)
+
+
 
 if __name__ == '__main__':
-    polygons = make_polygons(8, 4, 20, 60, 120, 800, 800)
     ax = create_plot()
-    for polygon in polygons:
-        add_polygon_to_scene(polygon,ax, 'blue')
+    for p in make_polygons(5,4,20,0.1,0.4):
+        add_polygon_to_scene(p,ax,'b')
     show_scene(ax)

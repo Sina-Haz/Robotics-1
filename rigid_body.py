@@ -3,7 +3,7 @@ import matplotlib.patches as patches
 from matplotlib.transforms import Affine2D
 import numpy as np
 from  create_scene import make_polygons, show_scene, create_plot, add_polygon_to_scene
-from check_collision import check_two_collision
+from collision_checking import check_two_collision
 import random
 
 #Controller to move the car using keyboard inputs

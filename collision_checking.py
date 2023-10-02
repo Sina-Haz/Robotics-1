@@ -65,34 +65,38 @@ def SAT_Collides(polygon1, polygon2):
             return False
     return True
 
-if __name__ == '__main__':
-    polygons = make_polygons(10, 4, 15, 80, 160, 800, 800)
-    check_all_boxes(polygons) #broad-phase collision
-    for pair in box_collisions:
-        p1, p2 = pair #unpack polygons
-        if SAT_Collides(p1, p2): polygon_collisions.append(pair) #SAT fine checking
+# This function is for project API, uses broad-phase bounding boxes + SAT to check for collision b/w polygons
+def collides(poly1:np.ndarray, poly2:np.ndarray):
+    box1,box2 = bound_polygons([poly1,poly2])
+    if check_box_collision(box1,box2):
+        if SAT_Collides(poly1,poly2): return True
+    return False
 
-    unique_colliding_polygons = set(tuple(str(polygon.tolist())) for pair in polygon_collisions for polygon in pair) #use list-comp to unpack tuples
-    ax = create_plot()
-    for polygon in polygons:
-        if tuple(str(polygon.tolist())) in unique_colliding_polygons:
-            add_polygon_to_scene(polygon, ax, 'red')
-        else:
-            add_polygon_to_scene(polygon, ax, 'blue')
-    show_scene(ax, 800, 800)
-    
-    
-def check_two_collision(polygon1, polygon2):
+def plot(polys:np.ndarray):
+    #Step 1: get all the collisions
     box_collisions.clear()
     polygon_collisions.clear()
-    polygons = []
-    polygons.append(polygon1)
-    polygons.append(polygon2)
-    check_all_boxes(polygons)
+    check_all_boxes(polys)
     for pair in box_collisions:
-        p1, p2 = pair #unpack polygons
-        if SAT_Collides(p1, p2): return False
-    return True
+        p1,p2 = pair
+        if SAT_Collides(p1,p2): polygon_collisions.append(pair)
+    
+    #Step 2: plot polygons, differentiating those that collided and those that didn't
+    unique_colliding_polygons = set(tuple(str(polygon.tolist())) for pair in polygon_collisions for polygon in pair) #use list-comp to unpack tuples
+    ax = create_plot()
+    for p in polys:
+        if tuple(str(p.tolist())) in unique_colliding_polygons:
+            add_polygon_to_scene(p, ax, True)
+        else:
+            add_polygon_to_scene(p, ax, False)
+    show_scene(ax)
+
+
+
+if __name__ == '__main__':
+    polygons = np.load('assignment1_student/collision_checking_polygons.npy', allow_pickle=True)
+    plot(polygons)
+    
     
     
 
