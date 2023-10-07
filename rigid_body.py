@@ -49,12 +49,6 @@ class CarController:
         # Update the car's position
         self.fig.canvas.draw()
     
-    def rotate_rectangle(degrees):
-        # Create a rotation transformation
-        rotation = Affine2D().rotate_deg(degrees)
-
-        # Apply the rotation to the rectangle's transformation
-        rectangle.set_transform(rotation + ax.transData) 
 
 #Checks if the car collides with an obstacle
 def check_car(car, obstacles):
@@ -64,6 +58,8 @@ def check_car(car, obstacles):
 
 #Gets the coordinates for the car
 def get_coords(r1):
+    path = r1.get_path()
+    vertices = path.vertices
     coords = np.array([r1.get_xy(), [r1.get_x()+r1.get_width(), r1.get_y()],
                    [r1.get_x()+r1.get_width(), r1.get_y()+r1.get_height()],
                    [r1.get_x(), r1.get_y()+r1.get_height()]]) 
@@ -83,7 +79,7 @@ if __name__ == '__main__':
         if(check_car(car, obstacles)): break
     ax.add_patch(car)
     controller = CarController(ax, car, obstacles)
-    show_scene(ax, 2, 2)
+    show_scene(ax)
 
 
 
