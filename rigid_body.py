@@ -3,7 +3,7 @@ import matplotlib.patches as patches
 from matplotlib.transforms import Affine2D
 import numpy as np
 from  create_scene import make_polygons, show_scene, create_plot, add_polygon_to_scene
-from collision_checking import check_two_collision
+from collision_checking import collides
 import random
 
 #Controller to move the car using keyboard inputs
@@ -49,24 +49,21 @@ class CarController:
         # Update the car's position
         self.fig.canvas.draw()
     
-    def rotate_rectangle(degrees):
-        # Create a rotation transformation
-        rotation = Affine2D().rotate_deg(degrees)
-
-        # Apply the rotation to the rectangle's transformation
-        rectangle.set_transform(rotation + ax.transData) 
 
 #Checks if the car collides with an obstacle
 def check_car(car, obstacles):
     for polygon in obstacles:
-        if not check_two_collision(polygon, get_coords(car)): return False
+        if not collides(polygon, get_coords(car)): return False
     return True
 
 #Gets the coordinates for the car
 def get_coords(r1):
+    path = r1.get_path()
+    vertices = path.vertices
     coords = np.array([r1.get_xy(), [r1.get_x()+r1.get_width(), r1.get_y()],
                    [r1.get_x()+r1.get_width(), r1.get_y()+r1.get_height()],
                    [r1.get_x(), r1.get_y()+r1.get_height()]]) 
+    print(vertices)
     return coords
 
 
@@ -83,7 +80,7 @@ if __name__ == '__main__':
         if(check_car(car, obstacles)): break
     ax.add_patch(car)
     controller = CarController(ax, car, obstacles)
-    show_scene(ax, 2, 2)
+    show_scene(ax)
 
 
 
