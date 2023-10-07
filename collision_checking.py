@@ -67,10 +67,13 @@ def SAT_Collides(polygon1, polygon2):
 
 # This function is for project API, uses broad-phase bounding boxes + SAT to check for collision b/w polygons
 def collides(poly1:np.ndarray, poly2:np.ndarray):
-    box1,box2 = bound_polygons([poly1,poly2])
-    if check_box_collision(box1,box2):
-        if SAT_Collides(poly1,poly2): return True
-    return False
+    box_collisions.clear()
+    polygon_collisions.clear()
+    check_all_boxes([poly1, poly2])
+    for pair in box_collisions:
+        p1, p2 = pair #unpack polygons
+        if SAT_Collides(p1, p2): return False
+    return True
 
 def plot(polys:np.ndarray):
     #Step 1: get all the collisions
