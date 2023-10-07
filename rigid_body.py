@@ -3,7 +3,7 @@ import matplotlib.patches as patches
 from matplotlib.transforms import Affine2D
 import numpy as np
 from  create_scene import make_polygons, show_scene, create_plot, add_polygon_to_scene
-from collision_checking import check_two_collision
+from collision_checking import collides
 import random
 
 #Controller to move the car using keyboard inputs
@@ -59,7 +59,7 @@ class CarController:
 #Checks if the car collides with an obstacle
 def check_car(car, obstacles):
     for polygon in obstacles:
-        if not check_two_collision(polygon, get_coords(car)): return False
+        if not collides(polygon, get_coords(car)): return False
     return True
 
 #Gets the coordinates for the car
@@ -72,7 +72,7 @@ def get_coords(r1):
 
        
 if __name__ == '__main__':
-    obstacles = np.load('2d_rigid_body.npy', allow_pickle=True)
+    obstacles = np.load('assignment1_student/2d_rigid_body.npy', allow_pickle=True)
     ax = create_plot()
     for polygon in obstacles:
         add_polygon_to_scene(polygon,ax, 'blue')
