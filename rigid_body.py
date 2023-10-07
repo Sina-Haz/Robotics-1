@@ -5,6 +5,7 @@ import numpy as np
 from  create_scene import make_polygons, show_scene, create_plot, add_polygon_to_scene
 from collision_checking import collides
 import random
+import math
 
 #Controller to move the car using keyboard inputs
 class CarController:
@@ -58,12 +59,11 @@ def check_car(car, obstacles):
 
 #Gets the coordinates for the car
 def get_coords(r1):
-    path = r1.get_path()
-    vertices = path.vertices
+    r = Affine2D().rotate_around(r1.get_x(),r1.get_y(),r1.get_angle())
     coords = np.array([r1.get_xy(), [r1.get_x()+r1.get_width(), r1.get_y()],
                    [r1.get_x()+r1.get_width(), r1.get_y()+r1.get_height()],
                    [r1.get_x(), r1.get_y()+r1.get_height()]]) 
-    return coords
+    return r.transform(coords)
 
 
        
