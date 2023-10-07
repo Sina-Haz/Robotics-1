@@ -63,13 +63,12 @@ def get_coords(r1):
     coords = np.array([r1.get_xy(), [r1.get_x()+r1.get_width(), r1.get_y()],
                    [r1.get_x()+r1.get_width(), r1.get_y()+r1.get_height()],
                    [r1.get_x(), r1.get_y()+r1.get_height()]]) 
-    print(vertices)
     return coords
 
 
        
 if __name__ == '__main__':
-    obstacles = np.load('2d_rigid_body.npy', allow_pickle=True)
+    obstacles = np.load('assignment1_student/2d_rigid_body.npy', allow_pickle=True)
     ax = create_plot()
     for polygon in obstacles:
         add_polygon_to_scene(polygon,ax, 'blue')
