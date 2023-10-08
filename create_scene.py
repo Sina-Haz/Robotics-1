@@ -57,6 +57,6 @@ def load_polygons(filename):
 
 if __name__ == '__main__':
     ax = create_plot()
-    for p in make_polygons(5,4,20,0.1,0.4):
-        add_polygon_to_scene(p,ax,'b')
+    for p in make_polygons(2,25,50,0.3,0.6):
+        add_polygon_to_scene(p,ax,True)
     show_scene(ax)

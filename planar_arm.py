@@ -1,7 +1,9 @@
-from create_scene import create_plot, make_polygons, show_scene, add_polygon_to_scene
+from create_scene import create_plot, make_polygons, show_scene, add_polygon_to_scene,load_polygons
+from collision_checking import bound_circle,bound_polygons,check_box_collision, circle_poly_collides, SAT_Collides
 import matplotlib.patches as patches
 from numpy import cos, sin, degrees, pi, radians
 import matplotlib.pyplot as plt
+import numpy as np
 
 # This class is used to control the planar arm using keyboard input
 class Arm_Controller:
@@ -29,7 +31,7 @@ class Arm_Controller:
         return(x,y)
     
 
-    def __init__(self,theta1,theta2,ax):
+    def __init__(self,theta1,theta2,ax,polygons=[]):
         self.ax = ax
         self.joint1 = (1,1) #Center of the first circle
         self.rad = 0.05 #radius of all joints
@@ -42,9 +44,10 @@ class Arm_Controller:
         self.joint2 = Arm_Controller.compute_circle_center(self.theta1, self.joint1, self.rad, self.rlen1)
         self.anchor2 = Arm_Controller.compute_rect_anchor(self.theta2, self.joint2, self.rad, self.rwid)
         self.joint3 = Arm_Controller.compute_circle_center(self.theta2,self.joint2,self.rad, self.rlen2)
+        self.polygons=polygons
 
 
-    def draw_arm(self):
+    def draw_arm(self, collisions=[False]*5):
         joint1 = patches.Circle(self.joint1, self.rad, fill=True, color='b')
         rect1 = patches.Rectangle(self.anchor1,self.rwid,self.rlen1, fill=True,color='g')
         rect1.set_angle(degrees(self.theta1 - pi/2))
@@ -52,6 +55,10 @@ class Arm_Controller:
         rect2 = patches.Rectangle(self.anchor2,self.rwid, self.rlen2, fill=True,color='g')
         rect2.set_angle(degrees(self.theta2 - pi/2))
         joint3 = patches.Circle(self.joint3,self.rad,fill=True,color='b')
+        all_comp = [joint1,joint2,joint3,rect1,rect2]
+        for i in range(len(collisions)):
+            if collisions[i]:
+                all_comp[i].set_color('r')
         self.ax.add_patch(joint1)
         self.ax.add_patch(rect1)
         self.ax.add_patch(joint2)
@@ -80,8 +87,78 @@ class Arm_Controller:
         # Clear the current axis and redraw the arm
         self.ax.cla()
         self.re_orient()
+        collisions = self.check_arm_collisions()
         self.draw_arm()
         self.ax.figure.canvas.draw()
+
+    #TODO: Implement avoid_init_collisions that detects collisions when arm has theta1, theta2 = 0 and removes those obstacles
+
+    # Helper method that computes rectangle vertices and returns a np array so we can treat it as a polygon, angle in radians
+    @staticmethod
+    def get_rect_vertices(anchor, width, height, angle):
+        # define rotation matrix
+        rotation_matrix = np.array([[np.cos(angle), -np.sin(angle)],
+                               [np.sin(angle),np.cos(angle)]])
+        #Unrotated untranslated version of rectangle
+        corners = np.array([[0,0], [width, 0], [width, height], [0, height]])
+
+        # Rotate corners
+        rotated_corners = np.dot(corners, rotation_matrix.T)
+
+        # Add anchor point coordinates (translate rectangle to correct position)
+        rectangle = rotated_corners + anchor
+        return rectangle
+    
+    def set_arm_obs(self,polygons):
+        self.polygons=polygons
+    
+    def set_obs_plot(self):
+        for p in self.polygons:
+            add_polygon_to_scene(p,self.ax,False)
+
+
+    def check_arm_collisions(self):
+        circles = [self.joint1,self.joint2,self.joint3]
+        rectangles = np.array([Arm_Controller.get_rect_vertices(self.anchor1,self.rwid,self.rlen1,self.theta1 - pi/2),
+                      Arm_Controller.get_rect_vertices(self.anchor2,self.rwid,self.rlen2,self.theta2-pi/2)])
+        
+        #Broad-Phase
+        circ_boxes = np.array([bound_circle(circle, self.rad) for circle in circles])
+        poly_boxes = bound_polygons(self.polygons)
+        possible_circle_collisions = []
+        possible_rect_collisions = []
+        for i in range(len(circ_boxes)):
+            for j in range(len(poly_boxes)):
+                if check_box_collision(circ_boxes[i], poly_boxes[j]):
+                    possible_circle_collisions.append((circles[i], self.polygons[j]))
+
+        for i in range(len(rectangles)):
+            for j in range(len(poly_boxes)):
+                if check_box_collision(rectangles[i], poly_boxes[j]):
+                    possible_rect_collisions.append((rectangles[i],self.polygons[j]))
+
+        # Using SAT for finer collision checking
+        joint_coll = [False]*3 #Keep track of which of joints collided
+        for coll in possible_circle_collisions:
+            circle,polygon = coll
+            if circle_poly_collides(circle,self.rad,polygon):
+                if self.joint1 == circle: joint_coll[0]=True
+                elif self.joint2 == circle: joint_coll[1]=True
+                elif self.joint3 == circle: joint_coll[2]=True
+        
+        arm_coll = [False] * 2 #Which rectangles collided
+        for coll in possible_rect_collisions:
+            rect,polygon = coll
+            if SAT_Collides(rect,polygon):
+                if rect == rectangles[0]:arm_coll[0]=True
+                elif rect == rectangles[1]:arm_coll[1]=True
+        return joint_coll+arm_coll #First 3 booleans indicate if any of the joints collided, last 2 indicate if arms collided
+
+
+
+
+
+
         
 
 
@@ -90,6 +167,9 @@ class Arm_Controller:
 if __name__ == '__main__':
     fig,ax = plt.subplots(dpi=100)
     arm = Arm_Controller(radians(30), radians(-30),ax)
+    obstacles=load_polygons('assignment1_student/collision_checking_polygons.npy')
+    arm.set_arm_obs(obstacles)
+    arm.set_obs_plot()
     arm.ax.figure.canvas.mpl_connect('key_press_event', arm.on_key)
     arm.draw_arm()
     show_scene(arm.ax)
