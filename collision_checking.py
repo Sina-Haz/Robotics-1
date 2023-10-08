@@ -10,6 +10,15 @@ def bound_polygons(polygons):
     bbs = [np.array([polygon.min(axis=0), polygon.max(axis=0)]) for polygon in polygons]
     return bbs
 
+def bound_circle(center, radius):
+    # Calculate the AABB (axis-aligned bounding box) of the circle.
+    min_x = center[0] - radius
+    max_x = center[0] + radius
+    min_y = center[1] - radius
+    max_y = center[1] + radius
+    return np.array([[min_x, min_y], [max_x, max_y]])
+
+
 #checks if 2 boxes intersect
 def check_box_collision(bbox1, bbox2):
     return not (bbox1[1][0] < bbox2[0][0] or 
@@ -63,6 +72,32 @@ def SAT_Collides(polygon1, polygon2):
         min2, max2 = project(polygon2, normal)
         if max1 < min2 or max2 < min1:
             return False
+    return True
+
+def circle_poly_collides(circle, radius, polygon):
+    # circle : (x, y)
+    # radius : scalar
+    # polygon: [(x1, y1), (x2, y2), ...]
+
+    edges = get_edges(polygon)
+    normals = get_normals(edges)
+    
+    # also create axes from circle to each vertex
+    for vertex in polygon:
+        diff = np.subtract(vertex, circle)
+        normals.append(diff/np.linalg.norm(diff))  # Normalize vector
+
+    # circle projection will just be (center projection - radius, center projection + radius) on any axis,
+    # because it's a circle
+    min_circle, max_circle = np.dot(normals[0], circle) - radius, np.dot(normals[0], circle) + radius
+    for normal in normals:
+        min1, max1 = project(polygon, normal)
+        min_circle_proj, max_circle_proj = np.dot(normal, circle) - radius, np.dot(normal, circle) + radius
+        
+        if max1 < min_circle_proj or max_circle_proj < min1:
+            return False  # Seperation axis found
+    
+    # No seperation axis found, the polygon and circle must be colliding
     return True
 
 # This function is for project API, uses broad-phase bounding boxes + SAT to check for collision b/w polygons

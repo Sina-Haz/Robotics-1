@@ -66,7 +66,7 @@ class Arm_Controller:
         self.anchor2 = Arm_Controller.compute_rect_anchor(self.theta2, self.joint2, self.rad, self.rwid)
         self.joint3 = Arm_Controller.compute_circle_center(self.theta2,self.joint2,self.rad, self.rlen2)
 
-
+    # On arrow key click change either theta 1 or theta 2 by 5 degrees
     def on_key(self, event):
         if event.key == 'left':
             self.theta1 -= radians(5)
