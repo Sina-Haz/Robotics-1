@@ -26,31 +26,53 @@ class CarController:
 
     def on_key_press(self, event):
         # Define step size for arrow key movement
-        step = 0.05
-        if self.x() >= 0.02 and self.x() <= 1.8 and self.y() >= .02 and self.y() <= 1.85 : #see if the car moved beyond the grid
-            if event.key == 'up':
+        step = 0.01
+        prev = ["x", 0]
+        if event.key == 'up':
+            if check_boundary(self.car,1,2):
                 self.car.set_y(self.car.get_y() + step)
-            elif event.key == 'down':
+                prev = ["y", step*-1]
+        elif event.key == 'down':
+            if check_boundary(self.car, 1,0):
                 self.car.set_y(self.car.get_y() - step)
-            elif event.key == 'right':
+                prev = ["y", step]
+        elif event.key == 'right':
+            if check_boundary(self.car, 0,2):
                 self.car.set_x(self.car.get_x() + step)
-            elif event.key == 'left':
+                prev = ["x", step*-1]
+        elif event.key == 'left':
+            if check_boundary(self.car, 0,0):
                 self.car.set_x(self.car.get_x() - step)
-            elif event.key == 'd':
-                self.car.set(angle = self.degrees() + 45)
-            elif event.key == 'a':
-                self.car.set(angle = self.degrees() - 45)
-            if(check_car(self.car, self.obstacles)): self.car.set(facecolor = "blue") #check if the car collides with any obstacle
-            else: self.car.set(facecolor = "red")
-        else:
-            if self.x() < 0.02: self.car.set_x(0.02)
-            elif self.x() > 1.8: self.car.set_x(1.8)
-            elif self.y() < 0.02: self.car.set_y(0.02)
-            elif self.y() >1.85: self.car.set_y(1.85)
+                prev = ["y", step]
+        elif event.key == 'd':
+            self.car.set(angle = self.degrees() + 10)
+            prev = ["a", -10]
+        elif event.key == 'a':
+            self.car.set(angle = self.degrees() - 10)
+            prev = ["a", 10]
+        if(not check_car(self.car, self.obstacles)): 
+            if prev[0] == "x": self.car.set_x(self.car.get_x() + prev[1]) 
+            elif prev[0] == "a": self.car.set(angle = self.degrees() + prev[1])
+            else: self.car.set_y(self.car.get_y() + prev[1]) 
+            
         # Update the car's position
         self.fig.canvas.draw()
     
 
+
+def check_boundary(car, i, j):
+    coords = get_coords(car)
+    for x in coords:
+        if i == 0 and j == 2:
+            if x[i] > j- .01: return False
+        elif i == 0 and j == 0:
+            if x[i] < j+.01: return False
+        elif i == 1 and j == 2:
+            if x[1] > j-.01: return False
+        elif i == 1 and j == 0:
+            if x[1] < j+0.01: return False
+    return True
+    
 #Checks if the car collides with an obstacle
 def check_car(car, obstacles):
     for polygon in obstacles:
@@ -59,10 +81,11 @@ def check_car(car, obstacles):
 
 #Gets the coordinates for the car
 def get_coords(r1):
-    r = Affine2D().rotate_around(r1.get_x(),r1.get_y(),r1.get_angle())
+    r = Affine2D().rotate_deg_around(r1.get_x(),r1.get_y(),r1.get_angle())
     coords = np.array([r1.get_xy(), [r1.get_x()+r1.get_width(), r1.get_y()],
                    [r1.get_x()+r1.get_width(), r1.get_y()+r1.get_height()],
                    [r1.get_x(), r1.get_y()+r1.get_height()]]) 
+
     return r.transform(coords)
 
 
