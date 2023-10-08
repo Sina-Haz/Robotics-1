@@ -43,11 +43,11 @@ class CarController:
         elif event.key == 'left':
             if check_boundary(self.car, 0,0):
                 self.car.set_x(self.car.get_x() - step)
-                prev = ["y", step]
-        elif event.key == 'd':
+                prev = ["x", step]
+        elif event.key == 'a':
             self.car.set(angle = self.degrees() + 10)
             prev = ["a", -10]
-        elif event.key == 'a':
+        elif event.key == 'd':
             self.car.set(angle = self.degrees() - 10)
             prev = ["a", 10]
         if(not check_car(self.car, self.obstacles)): 
