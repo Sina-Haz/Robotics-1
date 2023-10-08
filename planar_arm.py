@@ -88,7 +88,8 @@ class Arm_Controller:
         self.ax.cla()
         self.re_orient()
         collisions = self.check_arm_collisions()
-        self.draw_arm()
+        self.draw_arm(collisions=collisions)
+        self.set_obs_plot()
         self.ax.figure.canvas.draw()
 
     #TODO: Implement avoid_init_collisions that detects collisions when arm has theta1, theta2 = 0 and removes those obstacles
@@ -150,14 +151,9 @@ class Arm_Controller:
         for coll in possible_rect_collisions:
             rect,polygon = coll
             if SAT_Collides(rect,polygon):
-                if rect == rectangles[0]:arm_coll[0]=True
-                elif rect == rectangles[1]:arm_coll[1]=True
+                if np.array_equal(rect,rectangles[0]):arm_coll[0]=True
+                elif np.array_equal(rect,rectangles[1]):arm_coll[1]=True
         return joint_coll+arm_coll #First 3 booleans indicate if any of the joints collided, last 2 indicate if arms collided
-
-
-
-
-
 
         
 
