@@ -29,26 +29,24 @@ class CarController:
         step = 0.01
         prev = ["x", 0, 0]
         if event.key == 'up':
-            if check_boundary(self.car,1,2):
-                y = step * math.sin(math.radians(self.degrees()))
-                self.car.set_y(self.car.get_y() + y)
-                x = step * math.cos(math.radians(self.degrees()))
-                self.car.set_x(self.car.get_x() + x)
-                prev = ["f", x, y]
+            y = step * math.sin(math.radians(self.degrees()))
+            self.car.set_y(self.car.get_y() + y)
+            x = step * math.cos(math.radians(self.degrees()))
+            self.car.set_x(self.car.get_x() + x)
+            prev = ["f", x, y]
         elif event.key == 'down':
-            if check_boundary(self.car, 1,0):
-                y = step * math.sin(math.radians(self.degrees()))
-                self.car.set_y(self.car.get_y() - y)
-                x = step * math.cos(math.radians(self.degrees()))
-                self.car.set_x(self.car.get_x() - x)
-                prev = ["b", x, y]
+            y = step * math.sin(math.radians(self.degrees()))
+            self.car.set_y(self.car.get_y() - y)
+            x = step * math.cos(math.radians(self.degrees()))
+            self.car.set_x(self.car.get_x() - x)
+            prev = ["b", x, y]
         elif event.key == 'left':
             self.car.set(angle = self.degrees() + 10)
             prev = ["a", -10, 0]
         elif event.key == 'right':
             self.car.set(angle = self.degrees() - 10)
             prev = ["a", 10, 0]
-        if(not check_car(self.car, self.obstacles)): 
+        if(not (check_car(self.car, self.obstacles) and check_boundary(self.car)) ): 
             if prev[0] == "f": 
                 self.car.set_x(self.car.get_x() - prev[1]) 
                 self.car.set_y(self.car.get_y() - prev[2]) 
@@ -62,17 +60,13 @@ class CarController:
     
 
 
-def check_boundary(car, i, j):
+def check_boundary(car):
     coords = get_coords(car)
     for x in coords:
-        if i == 0 and j == 2:
-            if x[i] > j- .01: return False
-        elif i == 0 and j == 0:
-            if x[i] < j+.01: return False
-        elif i == 1 and j == 2:
-            if x[1] > j-.01: return False
-        elif i == 1 and j == 0:
-            if x[1] < j+0.01: return False
+        if x[0] > 2 or x[0] < 0:
+            return False
+        elif x[1] > 2 or x[1] < 0:
+            return False
     return True
     
 #Checks if the car collides with an obstacle
