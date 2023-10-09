@@ -6,6 +6,7 @@ from  create_scene import make_polygons, show_scene, create_plot, add_polygon_to
 from collision_checking import collides
 import random
 import math
+from scipy.spatial import ConvexHull
 
 #Controller to move the car using keyboard inputs
 class CarController:
@@ -26,7 +27,7 @@ class CarController:
 
     def on_key_press(self, event):
         # Define step size for arrow key movement
-        step = 0.01
+        step = 0.05
         prev = ["x", 0, 0]
         if event.key == 'up':
             y = step * math.sin(math.radians(self.degrees()))
@@ -84,7 +85,21 @@ def get_coords(r1):
 
     return r.transform(coords)
 
+def collision_space(car, obstacles, ax):
+    print(car)
+    for o in obstacles:
+        minkowski_sum_points = compute_minkowski_sum(car, o)
+        convex_hull = ConvexHull(minkowski_sum_points)
+        minkowski_sum_polygon = minkowski_sum_points[convex_hull.vertices]
+        add_polygon_to_scene(minkowski_sum_polygon, ax, False)
 
+
+def compute_minkowski_sum(A, B):
+    minkowski_sum = []
+    for a in A:
+        for b in B:
+            minkowski_sum.append(a + b)
+    return np.array(minkowski_sum)
        
 if __name__ == '__main__':
     obstacles = np.load('assignment1_student/2d_rigid_body.npy', allow_pickle=True)
@@ -93,11 +108,12 @@ if __name__ == '__main__':
         add_polygon_to_scene(polygon,ax, 'blue')
     car = []
     while(True):
-        x,y = random.uniform(0, 1.8), random.uniform(0, 1.8)
+        x,y = random.uniform(0, 1), random.uniform(0, 1)
         car = patches.Rectangle((x,y),0.2,0.1,linewidth = 1, edgecolor = 'r', facecolor = 'blue')
         if(check_car(car, obstacles)): break
     ax.add_patch(car)
     controller = CarController(ax, car, obstacles)
+    #collision_space(get_coords(car), obstacles, ax)
     show_scene(ax)
 
 
