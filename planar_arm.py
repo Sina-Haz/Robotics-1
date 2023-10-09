@@ -76,19 +76,30 @@ class Arm_Controller:
 
     # On arrow key click change either theta 1 or theta 2 by 5 degrees
     def on_key(self, event):
+        collisions = []
         if event.key == 'left':
             self.theta1 -= radians(5)
+            self.re_orient()
+            collisions = self.check_arm_collisions()
+            if any(collisions): self.theta1 += radians(5) # Reset if new theta causes an issue
         elif event.key == 'right':
             self.theta1 += radians(5)
+            self.re_orient()
+            collisions = self.check_arm_collisions()
+            if any(collisions): self.theta1 -= radians(5)
         elif event.key == 'up':
             self.theta2 += radians(5)
+            self.re_orient()
+            collisions = self.check_arm_collisions()
+            if any(collisions): self.theta2 -= radians(5)
         elif event.key == 'down':
             self.theta2 -= radians(5)
+            self.re_orient()
+            collisions = self.check_arm_collisions()
+            if any(collisions): self.theta2 += radians(5)
         
         # Clear the current axis and redraw the arm
         self.ax.cla()
-        self.re_orient()
-        collisions = self.check_arm_collisions()
         self.draw_arm(collisions=collisions)
         self.set_obs_plot()
         self.ax.figure.canvas.draw()
