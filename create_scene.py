@@ -54,6 +54,25 @@ def load_polygons(filename):
     return np.load(filename,allow_pickle=True)
 
 
+def initials():
+    # Define vertices for the horizontal part of 'T'
+    vertices_horizontal = [(0.3, 0.8), (0.7, 0.8), (0.7, .9), (0.3, 0.9)]
+
+    # Define vertices for the vertical part of 'T'
+    vertices_vertical = [(0.45, 0.2), (0.55, 0.2), (0.55, 0.8), (0.45, 0.8)]
+    # Create 'T' polygons
+    add_polygon_to_scene(vertices_horizontal, ax, True)
+    add_polygon_to_scene(vertices_vertical, ax, True)
+
+    # Define vertices for the letter 'S' using polygons
+    s = [[(1.3, 0.2), (1.7, 0.2), (1.7, .3), (1.3, 0.3)], 
+        [(1.6, 0.3), (1.7, 0.3), (1.7, 0.5), (1.6, 0.5)], 
+        [(1.3, 0.5), (1.7, 0.5), (1.7, .6), (1.3, 0.6)], 
+        [(1.3, 0.6), (1.4, 0.6), (1.4, 0.8), (1.3, 0.8)], 
+        [(1.3, 0.8), (1.7, 0.8), (1.7, .9), (1.3, .9)]]
+    for sx in s:
+        add_polygon_to_scene(sx, ax, True)
+
 
 if __name__ == '__main__':
     ax = create_plot()
@@ -65,3 +84,4 @@ if __name__ == '__main__':
     save_polygons(polygons, 'ex4.npy')
 
     show_scene(ax)
+
