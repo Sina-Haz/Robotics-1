@@ -93,6 +93,11 @@ class Arm_Controller:
         self.ax.figure.canvas.draw()
 
     #TODO: Implement avoid_init_collisions that detects collisions when arm has theta1, theta2 = 0 and removes those obstacles
+    def avoid_init_collisions(self):
+        self.theta1,self.theta2 = 0,0
+        colliding_polygons = self.check_arm_collisions(True)
+        self.polygons = [poly for poly in self.polygons if not any(np.array_equal(poly, coll_poly) for coll_poly in colliding_polygons)]
+        self.polygons = np.array(self.polygons)
 
     # Helper method that computes rectangle vertices and returns a np array so we can treat it as a polygon, angle in radians
     @staticmethod
@@ -118,7 +123,7 @@ class Arm_Controller:
             add_polygon_to_scene(p,self.ax,False)
 
 
-    def check_arm_collisions(self):
+    def check_arm_collisions(self, signal=False):
         circles = [self.joint1,self.joint2,self.joint3]
         rectangles = np.array([Arm_Controller.get_rect_vertices(self.anchor1,self.rwid,self.rlen1,self.theta1 - pi/2),
                       Arm_Controller.get_rect_vertices(self.anchor2,self.rwid,self.rlen2,self.theta2-pi/2)])
@@ -138,11 +143,13 @@ class Arm_Controller:
                 if check_box_collision(rectangles[i], poly_boxes[j]):
                     possible_rect_collisions.append((rectangles[i],self.polygons[j]))
 
+        colliding_polygons = []
         # Using SAT for finer collision checking
         joint_coll = [False]*3 #Keep track of which of joints collided
         for coll in possible_circle_collisions:
             circle,polygon = coll
             if circle_poly_collides(circle,self.rad,polygon):
+                colliding_polygons.append(polygon)
                 if self.joint1 == circle: joint_coll[0]=True
                 elif self.joint2 == circle: joint_coll[1]=True
                 elif self.joint3 == circle: joint_coll[2]=True
@@ -151,8 +158,11 @@ class Arm_Controller:
         for coll in possible_rect_collisions:
             rect,polygon = coll
             if SAT_Collides(rect,polygon):
+                colliding_polygons.append(polygon)
                 if np.array_equal(rect,rectangles[0]):arm_coll[0]=True
                 elif np.array_equal(rect,rectangles[1]):arm_coll[1]=True
+        if signal:
+            return colliding_polygons
         return joint_coll+arm_coll #First 3 booleans indicate if any of the joints collided, last 2 indicate if arms collided
 
         
@@ -162,9 +172,10 @@ class Arm_Controller:
 
 if __name__ == '__main__':
     fig,ax = plt.subplots(dpi=100)
-    arm = Arm_Controller(radians(30), radians(-30),ax)
+    arm = Arm_Controller(0, 0,ax)
     obstacles=load_polygons('assignment1_student/collision_checking_polygons.npy')
     arm.set_arm_obs(obstacles)
+    arm.avoid_init_collisions()
     arm.set_obs_plot()
     arm.ax.figure.canvas.mpl_connect('key_press_event', arm.on_key)
     arm.draw_arm()
