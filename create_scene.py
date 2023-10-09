@@ -57,6 +57,11 @@ def load_polygons(filename):
 
 if __name__ == '__main__':
     ax = create_plot()
-    for p in make_polygons(2,25,50,0.3,0.6):
-        add_polygon_to_scene(p,ax,True)
+
+    polygons = make_polygons(2,25,50,0.3,0.6)
+    for p in polygons:
+        add_polygon_to_scene(p,ax,'b')
+
+    save_polygons(polygons, 'ex4.npy')
+
     show_scene(ax)

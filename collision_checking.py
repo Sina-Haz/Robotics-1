@@ -132,7 +132,7 @@ def plot(polys:np.ndarray):
 
 
 if __name__ == '__main__':
-    polygons = np.load('assignment1_student/collision_checking_polygons.npy', allow_pickle=True)
+    polygons = np.load('ex4.npy', allow_pickle=True)
     plot(polygons)
     
     
