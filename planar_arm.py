@@ -3,6 +3,7 @@ from collision_checking import bound_circle,bound_polygons,check_box_collision, 
 import matplotlib.patches as patches
 from numpy import cos, sin, degrees, pi, radians
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import numpy as np
 
 # This class is used to control the planar arm using keyboard input
@@ -144,6 +145,7 @@ class Arm_Controller:
                     possible_rect_collisions.append((rectangles[i],self.polygons[j]))
 
         colliding_polygons = []
+
         # Using SAT for finer collision checking
         joint_coll = [False]*3 #Keep track of which of joints collided
         for coll in possible_circle_collisions:
@@ -166,6 +168,27 @@ class Arm_Controller:
         return joint_coll+arm_coll #First 3 booleans indicate if any of the joints collided, last 2 indicate if arms collided
 
         
+    def create_c_space(self):
+        occupancy_grid = np.zeros((100,100))
+
+        angles = np.linspace(-pi,pi, 100)
+
+        for i, theta1 in enumerate(angles):
+            for j, theta2 in enumerate(angles):
+                self.theta1,self.theta2=theta1,theta2
+                self.re_orient()
+                if any(self.check_arm_collisions()):
+                    occupancy_grid[i][j] = 1
+
+        #Custom colormap where 0 is purple, 1 is yellow
+        colors = [(0.0, 'purple'), (1.0, 'yellow')]
+        cmap = mcolors.LinearSegmentedColormap.from_list("custom_colormap", colors)
+
+        plt.imshow(occupancy_grid.T, origin='lower', cmap=cmap)
+        plt.xlabel("Theta 1")
+        plt.ylabel("Theta 2")
+        plt.title("Free C-Space")
+        plt.show()
 
 
 
@@ -173,13 +196,14 @@ class Arm_Controller:
 if __name__ == '__main__':
     fig,ax = plt.subplots(dpi=100)
     arm = Arm_Controller(0, 0,ax)
-    obstacles=load_polygons('assignment1_student/collision_checking_polygons.npy')
+    obstacles=load_polygons('assignment1_student/arm_polygons.npy')
     arm.set_arm_obs(obstacles)
     arm.avoid_init_collisions()
-    arm.set_obs_plot()
-    arm.ax.figure.canvas.mpl_connect('key_press_event', arm.on_key)
-    arm.draw_arm()
-    show_scene(arm.ax)
+    arm.create_c_space()
+    # arm.set_obs_plot()
+    # arm.ax.figure.canvas.mpl_connect('key_press_event', arm.on_key)
+    # arm.draw_arm()
+    # show_scene(arm.ax)
 
     
     
