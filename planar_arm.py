@@ -139,9 +139,9 @@ class Arm_Controller:
         circles = [self.joint1,self.joint2,self.joint3]
         rectangles = np.array([Arm_Controller.get_rect_vertices(self.anchor1,self.rwid,self.rlen1,self.theta1 - pi/2),
                       Arm_Controller.get_rect_vertices(self.anchor2,self.rwid,self.rlen2,self.theta2-pi/2)])
-        
         #Broad-Phase
         circ_boxes = np.array([bound_circle(circle, self.rad) for circle in circles])
+        rec_boxes = bound_polygons(rectangles)
         poly_boxes = bound_polygons(self.polygons)
         possible_circle_collisions = []
         possible_rect_collisions = []
@@ -150,13 +150,11 @@ class Arm_Controller:
                 if check_box_collision(circ_boxes[i], poly_boxes[j]):
                     possible_circle_collisions.append((circles[i], self.polygons[j]))
 
-        for i in range(len(rectangles)):
+        for i in range(len(rec_boxes)):
             for j in range(len(poly_boxes)):
-                if check_box_collision(rectangles[i], poly_boxes[j]):
+                if check_box_collision(rec_boxes[i], poly_boxes[j]):
                     possible_rect_collisions.append((rectangles[i],self.polygons[j]))
-
         colliding_polygons = []
-
         # Using SAT for finer collision checking
         joint_coll = [False]*3 #Keep track of which of joints collided
         for coll in possible_circle_collisions:
@@ -170,6 +168,7 @@ class Arm_Controller:
         arm_coll = [False] * 2 #Which rectangles collided
         for coll in possible_rect_collisions:
             rect,polygon = coll
+            print(coll)
             if SAT_Collides(rect,polygon):
                 colliding_polygons.append(polygon)
                 if np.array_equal(rect,rectangles[0]):arm_coll[0]=True
@@ -210,11 +209,11 @@ if __name__ == '__main__':
     obstacles=load_polygons('assignment1_student/arm_polygons.npy')
     arm.set_arm_obs(obstacles)
     arm.avoid_init_collisions()
-    arm.create_c_space()
-    # arm.set_obs_plot()
-    # arm.ax.figure.canvas.mpl_connect('key_press_event', arm.on_key)
-    # arm.draw_arm()
-    # show_scene(arm.ax)
+    #arm.create_c_space()
+    arm.set_obs_plot()
+    arm.ax.figure.canvas.mpl_connect('key_press_event', arm.on_key)
+    arm.draw_arm()
+    show_scene(arm.ax)
 
     
     
