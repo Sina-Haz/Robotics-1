@@ -97,7 +97,7 @@ class Arm_Controller:
         self.theta1,self.theta2 = 0,0
         colliding_polygons = self.check_arm_collisions(True)
         self.polygons = [poly for poly in self.polygons if not any(np.array_equal(poly, coll_poly) for coll_poly in colliding_polygons)]
-        self.polygons = np.array(self.polygons)
+        self.polygons = np.array(self.polygons, dtype=object)
 
     # Helper method that computes rectangle vertices and returns a np array so we can treat it as a polygon, angle in radians
     @staticmethod
