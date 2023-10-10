@@ -102,7 +102,7 @@ def compute_minkowski_sum(A, B):
     return np.array(minkowski_sum)
        
 if __name__ == '__main__':
-    obstacles = np.load('assignment1_student/2d_rigid_body.npy', allow_pickle=True)
+    obstacles = np.load('2d_rigid_body.npy', allow_pickle=True)
     ax = create_plot()
     for polygon in obstacles:
         add_polygon_to_scene(polygon,ax, 'blue')
