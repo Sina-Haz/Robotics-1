@@ -55,11 +55,13 @@ def load_polygons(filename):
 
 
 def initials():
+    initial = []
     # Define vertices for the horizontal part of 'T'
     vertices_horizontal = [(0.3, 0.8), (0.7, 0.8), (0.7, .9), (0.3, 0.9)]
-
+    initial.append(vertices_horizontal)
     # Define vertices for the vertical part of 'T'
     vertices_vertical = [(0.45, 0.2), (0.55, 0.2), (0.55, 0.8), (0.45, 0.8)]
+    initial.append(vertices_vertical)
     # Create 'T' polygons
     add_polygon_to_scene(vertices_horizontal, ax, True)
     add_polygon_to_scene(vertices_vertical, ax, True)
@@ -70,8 +72,11 @@ def initials():
         [(1.3, 0.5), (1.7, 0.5), (1.7, .6), (1.3, 0.6)], 
         [(1.3, 0.6), (1.4, 0.6), (1.4, 0.8), (1.3, 0.8)], 
         [(1.3, 0.8), (1.7, 0.8), (1.7, .9), (1.3, .9)]]
+    initial.append(s)
     for sx in s:
         add_polygon_to_scene(sx, ax, True)
+    initialArray = np.array(initial, dtype=object)
+    save_polygons(initialArray, "initialscene")
 
 
 if __name__ == '__main__':
@@ -81,7 +86,7 @@ if __name__ == '__main__':
     for p in polygons:
         add_polygon_to_scene(p,ax,'b')
 
-    save_polygons(polygons, 'ex4.npy')
-
+    #save_polygons(polygons, 'ex4.npy')
+    #initials()
     show_scene(ax)
 

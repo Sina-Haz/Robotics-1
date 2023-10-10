@@ -168,7 +168,6 @@ class Arm_Controller:
         arm_coll = [False] * 2 #Which rectangles collided
         for coll in possible_rect_collisions:
             rect,polygon = coll
-            print(coll)
             if SAT_Collides(rect,polygon):
                 colliding_polygons.append(polygon)
                 if np.array_equal(rect,rectangles[0]):arm_coll[0]=True
