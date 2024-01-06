@@ -168,7 +168,6 @@ class Arm_Controller:
         arm_coll = [False] * 2 #Which rectangles collided
         for coll in possible_rect_collisions:
             rect,polygon = coll
-            print(coll)
             if SAT_Collides(rect,polygon):
                 colliding_polygons.append(polygon)
                 if np.array_equal(rect,rectangles[0]):arm_coll[0]=True
@@ -206,10 +205,10 @@ class Arm_Controller:
 if __name__ == '__main__':
     fig,ax = plt.subplots(dpi=100)
     arm = Arm_Controller(0, 0,ax)
-    obstacles=load_polygons('assignment1_student/arm_polygons.npy')
+    obstacles=load_polygons('arm_polygons.npy')
     arm.set_arm_obs(obstacles)
     arm.avoid_init_collisions()
-    #arm.create_c_space()
+    # arm.create_c_space()
     arm.set_obs_plot()
     arm.ax.figure.canvas.mpl_connect('key_press_event', arm.on_key)
     arm.draw_arm()
